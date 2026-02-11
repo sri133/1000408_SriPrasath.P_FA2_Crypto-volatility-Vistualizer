@@ -1,8 +1,12 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
+# -----------------------------
+# Page config
+# -----------------------------
 st.set_page_config(page_title="Crypto Data Preparation", layout="wide")
 st.title("📊 Crypto Volatility Visualizer")
 
@@ -20,9 +24,9 @@ try:
 except Exception as e:
     st.error(f"❌ Error loading CSV file: {e}")
     st.stop()
-    
+
 # -----------------------------
-# Raw preview (limited)
+# Raw preview
 # -----------------------------
 st.subheader("🔹 Raw Dataset Preview")
 st.write(df.head(1000))
@@ -103,17 +107,129 @@ if "Close_Price" in subset_df.columns:
     st.subheader("🔹 Close Price Statistics")
     st.write(subset_df["Close_Price"].describe())
 
-st.success("✅Complete — Data cleaned and ready for visualization!")
+st.success("✅ Complete — Data cleaned and ready!")
 
 # =============================
-# Stage 5: Visualizations
+# Pattern Simulator Section
 # =============================
 
-st.header("📈Bitcoin Visualizations")
+st.header("🎛 Crypto Pattern Simulator")
 
 # -----------------------------
-# Downsample for plotting
+# Pattern Selector
 # -----------------------------
+pattern_type = st.selectbox(
+    "Choose price movement pattern:",
+    ["Real Data", "Sine Wave", "Cosine Wave", "Random Noise"]
+)
+
+# -----------------------------
+# Controls
+# -----------------------------
+col1, col2 = st.columns(2)
+
+with col1:
+    amplitude = st.slider(
+        "Amplitude (Swing Size)",
+        100, 5000, 1000, step=100
+    )
+
+    frequency = st.slider(
+        "Frequency (Swing Speed)",
+        1, 20, 6
+    )
+
+with col2:
+    drift = st.slider(
+        "Drift (Trend Direction)",
+        -2000, 2000, 0, step=100
+    )
+
+comparison_mode = st.checkbox("Enable Comparison Mode")
+
+# -----------------------------
+# Pattern generation
+# -----------------------------
+pattern_df = subset_df.copy()
+
+if "Timestamp" in pattern_df.columns and "Close_Price" in pattern_df.columns:
+
+    n = len(pattern_df)
+    base_price = pattern_df["Close_Price"].mean()
+
+    x = np.linspace(0, frequency * np.pi, n)
+    drift_line = np.linspace(0, drift, n)
+
+    if pattern_type == "Sine Wave":
+        wave = amplitude * np.sin(x)
+
+    elif pattern_type == "Cosine Wave":
+        wave = amplitude * np.cos(x)
+
+    elif pattern_type == "Random Noise":
+        wave = np.random.normal(0, amplitude / 2, n)
+
+    else:
+        wave = pattern_df["Close_Price"] - base_price
+
+    pattern_df["Synthetic_Price"] = base_price + wave + drift_line
+
+# -----------------------------
+# Visualization
+# -----------------------------
+st.subheader("🔹 Pattern Visualization")
+
+if comparison_mode:
+
+    col1, col2 = st.columns(2)
+
+    stable_wave = (amplitude / 4) * np.sin(x)
+    volatile_wave = (amplitude * 2) * np.sin(x)
+
+    stable_price = base_price + stable_wave + drift_line
+    volatile_price = base_price + volatile_wave + drift_line
+
+    stable_df = pattern_df.copy()
+    volatile_df = pattern_df.copy()
+
+    stable_df["Price"] = stable_price
+    volatile_df["Price"] = volatile_price
+
+    with col1:
+        st.markdown("### 📉 Stable (Small Swings)")
+        fig_stable = px.line(
+            stable_df,
+            x="Timestamp",
+            y="Price"
+        )
+        st.plotly_chart(fig_stable, use_container_width=True)
+
+    with col2:
+        st.markdown("### 📈 Volatile (Large Swings)")
+        fig_volatile = px.line(
+            volatile_df,
+            x="Timestamp",
+            y="Price"
+        )
+        st.plotly_chart(fig_volatile, use_container_width=True)
+
+else:
+
+    fig_pattern = px.line(
+        pattern_df,
+        x="Timestamp",
+        y="Synthetic_Price",
+        title=f"{pattern_type} Pattern Simulation"
+    )
+
+    st.plotly_chart(fig_pattern, use_container_width=True)
+
+# =============================
+# Original Visualizations
+# =============================
+
+st.header("📈 Bitcoin Visualizations")
+
 MAX_POINTS = 5000
 
 if len(subset_df) > MAX_POINTS:
@@ -122,9 +238,7 @@ if len(subset_df) > MAX_POINTS:
 else:
     plot_df = subset_df.copy()
 
-# -----------------------------
-# Price Over Time
-# -----------------------------
+# Price over time
 if "Timestamp" in plot_df.columns and "Close_Price" in plot_df.columns:
 
     st.subheader("🔹 Bitcoin Close Price Over Time")
@@ -132,24 +246,13 @@ if "Timestamp" in plot_df.columns and "Close_Price" in plot_df.columns:
     fig_price = px.line(
         plot_df,
         x="Timestamp",
-        y="Close_Price",
-        title="Bitcoin Price Over Time",
-        labels={
-            "Timestamp": "Date",
-            "Close_Price": "Close Price (USD)"
-        }
+        y="Close_Price"
     )
 
     st.plotly_chart(fig_price, use_container_width=True)
 
-# -----------------------------
-# High vs Low Comparison
-# -----------------------------
-if (
-    "Timestamp" in plot_df.columns and
-    "High_Price" in plot_df.columns and
-    "Low_Price" in plot_df.columns
-):
+# High vs Low
+if {"Timestamp", "High_Price", "Low_Price"}.issubset(plot_df.columns):
 
     st.subheader("🔹 High vs Low Price Comparison")
 
@@ -169,38 +272,23 @@ if (
         name="Low Price"
     ))
 
-    fig_hl.update_layout(
-        title="High vs Low Bitcoin Prices",
-        xaxis_title="Date",
-        yaxis_title="Price (USD)"
-    )
-
     st.plotly_chart(fig_hl, use_container_width=True)
 
-# -----------------------------
-# Volume Analysis
-# -----------------------------
-if "Timestamp" in plot_df.columns and "Volume" in plot_df.columns:
+# Volume
+if {"Timestamp", "Volume"}.issubset(plot_df.columns):
 
     st.subheader("🔹 Trading Volume Analysis")
 
     fig_volume = px.bar(
         plot_df,
         x="Timestamp",
-        y="Volume",
-        title="Bitcoin Trading Volume",
-        labels={
-            "Timestamp": "Date",
-            "Volume": "Trading Volume"
-        }
+        y="Volume"
     )
 
     st.plotly_chart(fig_volume, use_container_width=True)
 
-# -----------------------------
-# Stable vs Volatile Periods
-# -----------------------------
-if "Timestamp" in plot_df.columns and "Close_Price" in plot_df.columns:
+# Volatility
+if {"Timestamp", "Close_Price"}.issubset(plot_df.columns):
 
     st.subheader("🔹 Stable vs Volatile Periods")
 
@@ -217,108 +305,9 @@ if "Timestamp" in plot_df.columns and "Close_Price" in plot_df.columns:
         vol_df,
         x="Timestamp",
         y="Close_Price",
-        color="Volatility_Label",
-        title="Stable vs Volatile Bitcoin Periods",
-        labels={
-            "Timestamp": "Date",
-            "Close_Price": "Close Price (USD)"
-        }
+        color="Volatility_Label"
     )
 
     st.plotly_chart(fig_volatility, use_container_width=True)
 
-st.success("✅Visualizations Generated!")
-
-
-
-
-
-##import streamlit as st
-##import pandas as pd
-##
-##st.set_page_config(page_title="Crypto Data Preparation", layout="wide")
-##st.title("📊 Crypto Volatility Visualizer — Stage 4")
-##
-### Load dataset
-##file_path = r"C:\Users\LENOVO\Downloads\btcusd_1-min_data.csv.crdownload"
-##
-##try:
-##    df = pd.read_csv(file_path)
-##except FileNotFoundError:
-##    st.error("❌ CSV file not found! Check your file path.")
-##    st.stop()
-##
-### Raw preview
-##st.subheader("🔹 Raw Dataset Preview")
-##st.write(df.head())
-##
-### Dataset overview
-##st.subheader("🔹 Dataset Overview")
-##
-##col1, col2 = st.columns(2)
-##
-##with col1:
-##    st.write("Dataset Shape:", df.shape)
-##    st.write("Columns:", df.columns.tolist())
-##
-##with col2:
-##    st.write("Missing values:")
-##    st.write(df.isnull().sum())
-##
-### Timestamp conversion
-##if "Timestamp" in df.columns:
-##    df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
-##    df = df.sort_values("Timestamp")
-##
-### Rename columns
-##df.rename(columns={
-##    "Open": "Open_Price",
-##    "High": "High_Price",
-##    "Low": "Low_Price",
-##    "Close": "Close_Price"
-##}, inplace=True)
-##
-### Handle missing values
-##df = df.fillna(df.mean(numeric_only=True))
-##df = df.dropna()
-##
-### -----------------------------
-### Typing range selection
-### -----------------------------
-##st.subheader("🔹 Select Data Range to Visualize")
-##
-##col1, col2 = st.columns(2)
-##
-##with col1:
-##    start_row = st.number_input(
-##        "Start row:",
-##        min_value=0,
-##        max_value=len(df) - 1,
-##        value=0,
-##        step=1
-##    )
-##
-##with col2:
-##    end_row = st.number_input(
-##        "End row:",
-##        min_value=int(start_row) + 1,
-##        max_value=len(df),
-##        value=min(500, len(df)),
-##        step=1
-##    )
-##
-##subset_df = df.iloc[int(start_row):int(end_row)]
-##
-##st.write(f"Showing rows from **{start_row}** to **{end_row}**")
-##
-### Cleaned preview
-##st.subheader("🔹 Cleaned Subset Preview")
-##st.write(subset_df)
-##
-### Statistics
-##if "Close_Price" in subset_df.columns:
-##    st.subheader("🔹 Close Price Statistics")
-##    st.write(subset_df["Close_Price"].describe())
-##
-##st.success("✅ Stage 4 Complete — Data cleaned and ready for visualization!")
-
+st.success("✅ Visualizations Generated!")

@@ -13,14 +13,14 @@ st.title("📊 Crypto Volatility Visualizer")
 def load_data(path):
     return pd.read_csv(path)
 
-file_path = r"C:\Users\LENOVO\Downloads\btcusd_1-min_data.csv.crdownload"
+file_path = "https://raw.githubusercontent.com/sri133/1000408_SriPrasath.P_FA2_Crypto-volatility-Vistualizer/main/btcusd_1-min_data.csv.crdownload"
 
 try:
     df = load_data(file_path)
-except FileNotFoundError:
-    st.error("❌ CSV file not found! Check your file path.")
+except Exception as e:
+    st.error(f"❌ Error loading CSV file: {e}")
     st.stop()
-
+    
 # -----------------------------
 # Raw preview (limited)
 # -----------------------------
@@ -321,3 +321,4 @@ st.success("✅Visualizations Generated!")
 ##    st.write(subset_df["Close_Price"].describe())
 ##
 ##st.success("✅ Stage 4 Complete — Data cleaned and ready for visualization!")
+

@@ -1,1 +1,149 @@
-# 1000408_SriPrasath.P_FA2_Crypto-volatility-Vistualizer
+📊 Crypto Volatility Visualizer
+
+Simulating Market Swings with Mathematics for AI and Python
+
+📌 Project Overview
+
+The Crypto Volatility Visualizer is an interactive Streamlit dashboard that helps users understand cryptocurrency price behavior through real data and mathematical simulations. This project connects mathematical concepts such as sine waves, cosine waves, drift, and random noise with real-world crypto market volatility.
+
+The app allows users to explore Bitcoin price movements, generate synthetic volatility patterns, and compare stable vs volatile market behavior in an visual, interactive way.
+
+This project was developed as part of the Mathematics for AI coursework (FA-1 & FA-2).
+
+🎯 Objectives
+
+This project aims to:
+
+Analyze real cryptocurrency datasets to understand volatility
+
+Simulate price swings using mathematical functions
+
+Create interactive visualizations for learning financial behavior
+
+Build and deploy a working Streamlit dashboard
+
+Help users compare stable and volatile market patterns
+
+🧠 FA-1: Planning & Design
+
+Before coding, the dashboard was carefully planned using:
+
+✅ Feature Planning
+
+The app includes:
+
+Pattern Selector
+
+Real Data
+
+Sine Wave
+
+Cosine Wave
+
+Random Noise
+
+Amplitude Control
+
+Adjusts swing size of price movements
+
+Frequency Control
+
+Changes speed of price fluctuations
+
+Drift Control
+
+Adds upward or downward trend
+
+Comparison Mode
+
+Displays stable vs volatile patterns side-by-side
+
+✅ Storyboard & Data Flow
+
+The dashboard design includes:
+
+Sidebar with interactive sliders and dropdowns
+
+Main visualization panel for charts
+
+Optional comparison layout with two graphs
+
+Data flow:
+
+User selects parameters
+
+System generates synthetic or real data
+
+Graph updates instantly
+
+💾 Dataset
+
+The project uses a cryptocurrency historical dataset containing:
+
+Timestamp
+
+Open price
+
+High price
+
+Low price
+
+Close price
+
+Trading volume
+
+Data is cleaned and prepared using Pandas before visualization.
+
+Dataset source:
+Kaggle Cryptocurrency Price History
+
+⚙️ Features
+📊 Data Preparation
+
+CSV dataset loading
+
+Timestamp conversion
+
+Missing value handling
+
+Column renaming for clarity
+
+Subset selection for faster visualization
+
+📈 Visualizations
+
+The app generates:
+
+Bitcoin close price over time
+
+High vs low price comparison
+
+Trading volume bar charts
+
+Stable vs volatile period detection
+
+Synthetic pattern simulations
+
+🎛 Pattern Simulator
+
+Users can simulate crypto price behavior using:
+
+Sine and cosine wave models
+
+Random noise shocks
+
+Adjustable amplitude, frequency, and drift
+
+Side-by-side comparison mode
+
+🛠 Technologies Used
+
+Python
+
+Streamlit
+
+Pandas
+
+NumPy
+
+Plotly change this too readme format

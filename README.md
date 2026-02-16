@@ -2,7 +2,7 @@
 
 Simulating Market Swings with Mathematics for AI and Python
 
-📌 Project Overview
+**📌 Project Overview**
 
 The Crypto Volatility Visualizer is an interactive Streamlit dashboard that helps users understand cryptocurrency price behavior through real data and mathematical simulations. This project connects mathematical concepts such as sine waves, cosine waves, drift, and random noise with real-world crypto market volatility.
 
@@ -10,183 +10,183 @@ The app allows users to explore Bitcoin price movements, generate synthetic vola
 
 This project was developed as part of the Mathematics for AI coursework (FA-1 & FA-2).
 
-🎯 Objectives
+**🎯 Objectives**
 
-This project aims to:
+*This project aims to:*
 
-Analyze real cryptocurrency datasets to understand volatility
+1. Analyze real cryptocurrency datasets to understand volatility
 
-Simulate price swings using mathematical functions
+2. Simulate price swings using mathematical functions
+   
+3. Create interactive visualizations for learning financial behavior
 
-Create interactive visualizations for learning financial behavior
+4. Build and deploy a working Streamlit dashboard
 
-Build and deploy a working Streamlit dashboard
+5. Help users compare stable and volatile market patterns
 
-Help users compare stable and volatile market patterns
-
-🧠 FA-1: Planning & Design
+**🧠 FA-1: Planning & Design**
 
 Before coding, the dashboard was carefully planned using:
 
-✅ Feature Planning
+**✅ Feature Planning**
 
-The app includes:
+*The app includes:*
 
-Pattern Selector
+1. Pattern Selector
 
-Real Data
+2. Real Data
 
-Sine Wave
+3. Sine Wave
 
-Cosine Wave
+4. Cosine Wave
 
-Random Noise
+5. Random Noise
 
-Amplitude Control
+6. Amplitude Control
 
-Adjusts swing size of price movements
+7. Adjusts swing size of price movements
 
-Frequency Control
+8. Frequency Control
 
-Changes speed of price fluctuations
+9. Changes speed of price fluctuations
 
-Drift Control
+10. Drift Control
 
-Adds upward or downward trend
+11. Adds upward or downward trend
 
-Comparison Mode
+12. Comparison Mode:
 
 Displays stable vs volatile patterns side-by-side
 
-✅ Storyboard & Data Flow
+**✅ Storyboard & Data Flow**
 
-The dashboard design includes:
+*The dashboard design includes:*
 
-Sidebar with interactive sliders and dropdowns
+1. Sidebar with interactive sliders and dropdowns
 
-Main visualization panel for charts
+2. Main visualization panel for charts
 
-Optional comparison layout with two graphs
+3. Optional comparison layout with two graphs
 
-Data flow:
+*Data flow:*
 
-User selects parameters
+1. User selects parameters
 
-System generates synthetic or real data
+2. System generates synthetic or real data
 
-Graph updates instantly
+3. Graph updates instantly
 
-💾 Dataset
+**💾 Dataset**
 
-The project uses a cryptocurrency historical dataset containing:
+*The project uses a cryptocurrency historical dataset containing:*
 
-Timestamp
+1. Timestamp
 
-Open price
+2. Open price
 
-High price
+3. High price
 
-Low price
+4. Low price
 
-Close price
+5. Close price
 
-Trading volume
+6. Trading volume
 
-Data is cleaned and prepared using Pandas before visualization.
+7. Data is cleaned and prepared using Pandas before visualization.
 
-Dataset source:
+**Dataset source:**
 Kaggle Cryptocurrency Price History
 
-⚙️ Features
-📊 Data Preparation
+**⚙️ Features**
+*📊 Data Preparation*
 
-CSV dataset loading
+1. CSV dataset loading
 
-Timestamp conversion
+2. Timestamp conversion
 
-Missing value handling
+3. Missing value handling
 
-Column renaming for clarity
+4. Column renaming for clarity
 
-Subset selection for faster visualization
+5. Subset selection for faster visualization
 
-📈 Visualizations
+**📈 Visualizations**
 
-The app generates:
+*The app generates:*
 
-Bitcoin close price over time
+1. Bitcoin close price over time
 
-High vs low price comparison
+2. High vs low price comparison
 
-Trading volume bar charts
+3. Trading volume bar charts
 
-Stable vs volatile period detection
+4. Stable vs volatile period detection
 
-Synthetic pattern simulations
+5. Synthetic pattern simulations
 
-🎛 Pattern Simulator
+**🎛 Pattern Simulator**
 
-Users can simulate crypto price behavior using:
+*Users can simulate crypto price behavior using:*
 
-Sine and cosine wave models
+1. Sine and cosine wave models
 
-Random noise shocks
+2. Random noise shocks
 
-Adjustable amplitude, frequency, and drift
+3. Adjustable amplitude, frequency, and drift
 
-Side-by-side comparison mode
+4. Side-by-side comparison mode
 
-🛠 Technologies Used
+**🛠 Technologies Used**
 
-Python
+1. Python
 
-Streamlit
+2. Streamlit
 
-Pandas
+3. Pandas
 
-NumPy
+4. NumPy
 
-Plotly 
+5. Plotly 
 
-🌐 Deployment
+**🌐 Deployment**
 
 The app is deployed using Streamlit Cloud.
 
-👉 Live App Link:
-(https://1000408sriprasathpfa2crypto-volatility-vistualizer-miapohwnafb.streamlit.app/)
+**👉 Live App Link:**
+https://1000408sriprasathpfa2crypto-volatility-vistualizer-miapohwnafb.streamlit.app/
 
-📂 Project Structure
+**📂 Project Structure**
 ├── app.py                # Main Streamlit application
 ├── requirements.txt      # Python dependencies
 ├── README.md             # Project documentation
 
-📊 Learning Outcomes Achieved
+**📊 Learning Outcomes Achieved**
 
-This project demonstrates:
+1. This project demonstrates:
 
-Real-world financial data analysis
+2. Real-world financial data analysis
 
-Mathematical modeling of volatility
+3. Mathematical modeling of volatility
 
-Interactive dashboard design
+4. Interactive dashboard design
 
-Python data visualization skills
+5. Python data visualization skills
 
-Streamlit app deployment
+6. Streamlit app deployment
 
-🔮 Future Improvements
+**Future Improvements:**
 
-Add more cryptocurrencies
+1. Add more cryptocurrencies
 
-Advanced volatility metrics
+2. Advanced volatility metrics
 
-Machine learning prediction models
+3. Machine learning prediction models
 
-Enhanced UI/UX design
+4. Enhanced UI/UX design
 
-User-uploaded datasets
+5. User-uploaded datasets
 
-Credits:
+**Credits:**
 
 Student Name: Sri Prasath. P
 

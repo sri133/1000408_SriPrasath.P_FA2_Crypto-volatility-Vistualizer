@@ -146,4 +146,50 @@ Pandas
 
 NumPy
 
-Plotly change this too readme format
+Plotly 
+
+🌐 Deployment
+
+The app is deployed using Streamlit Cloud.
+
+👉 Live App Link:
+(https://1000408sriprasathpfa2crypto-volatility-vistualizer-miapohwnafb.streamlit.app/)
+
+📂 Project Structure
+├── app.py                # Main Streamlit application
+├── requirements.txt      # Python dependencies
+├── README.md             # Project documentation
+
+📊 Learning Outcomes Achieved
+
+This project demonstrates:
+
+Real-world financial data analysis
+
+Mathematical modeling of volatility
+
+Interactive dashboard design
+
+Python data visualization skills
+
+Streamlit app deployment
+
+🔮 Future Improvements
+
+Add more cryptocurrencies
+
+Advanced volatility metrics
+
+Machine learning prediction models
+
+Enhanced UI/UX design
+
+User-uploaded datasets
+
+Credits:
+
+Student Name: Sri Prasath. P
+Mentor Name: Syed Ali Beema. S
+Course: Mathematics for AI-1
+School Name: Jain Vidyalaya IB World School
+

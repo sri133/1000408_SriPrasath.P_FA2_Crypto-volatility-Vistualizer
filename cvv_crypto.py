@@ -311,3 +311,4 @@ if {"Timestamp", "Close_Price"}.issubset(plot_df.columns):
     st.plotly_chart(fig_volatility, use_container_width=True)
 
 st.success("✅ Visualizations Generated!")
+

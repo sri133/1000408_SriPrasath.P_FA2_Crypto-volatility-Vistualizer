@@ -189,7 +189,10 @@ User-uploaded datasets
 Credits:
 
 Student Name: Sri Prasath. P
+
 Mentor Name: Syed Ali Beema. S
+
 Course: Mathematics for AI-1
+
 School Name: Jain Vidyalaya IB World School
 

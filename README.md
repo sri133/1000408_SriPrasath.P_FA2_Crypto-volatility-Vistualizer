@@ -1,4 +1,4 @@
-*📊 Crypto Volatility Visualizer*
+**📊 Crypto Volatility Visualizer**
 
 Simulating Market Swings with Mathematics for AI and Python
 

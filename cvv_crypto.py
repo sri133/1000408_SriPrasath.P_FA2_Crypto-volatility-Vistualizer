@@ -3,6 +3,13 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import yfinance as yf
+from datetime import datetime, timedelta
+from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import MinMaxScaler
+import streamlit.components.v1 as components
+import base64
+import time
 
 # -----------------------------
 # Page config
@@ -235,14 +242,6 @@ st.success("✅ Volume visibility improved and charts synchronized!")
 # 🚀 ADVANCED FEATURES MODULE (ADD BELOW EXISTING CODE ONLY)
 # ============================================================
 
-import yfinance as yf
-from datetime import datetime, timedelta
-from sklearn.neural_network import MLPRegressor
-from sklearn.preprocessing import MinMaxScaler
-import streamlit.components.v1 as components
-import base64
-import time
-
 st.markdown("---")
 st.header("🚀 Advanced Live Trading Features")
 
@@ -364,3 +363,4 @@ download_link = f"""
 st.markdown(download_link, unsafe_allow_html=True)
 
 st.success("✅ Advanced features loaded successfully!")
+

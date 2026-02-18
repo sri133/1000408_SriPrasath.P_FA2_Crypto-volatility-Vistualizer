@@ -246,7 +246,7 @@ st.markdown("---")
 st.header("🚀 Advanced Live Trading Features")
 
 # ------------------------------------------------------------
-# 1. Live Crypto Data Dashboard
+# 1. Live Crypto Data Dashboard (SAFE VERSION)
 # ------------------------------------------------------------
 st.subheader("📡 Live Crypto Market Feed")
 
@@ -261,18 +261,36 @@ period = st.selectbox(
 )
 
 if st.button("🔄 Fetch Live Data"):
-    live_data = yf.download(live_crypto, period=period, interval="1m")
-    live_data.reset_index(inplace=True)
 
-    fig_live = px.line(
-        live_data,
-        x="Datetime",
-        y="Close",
-        title=f"Live {live_crypto} Price",
-        template="plotly_dark"
-    )
+    try:
+        live_data = yf.download(
+            live_crypto,
+            period=period,
+            interval="5m",
+            progress=False
+        )
 
-    st.plotly_chart(fig_live, use_container_width=True)
+        if live_data.empty:
+            st.warning("⚠️ No data returned from Yahoo Finance.")
+        else:
+            live_data.reset_index(inplace=True)
+
+            # Detect correct time column automatically
+            time_col = "Datetime" if "Datetime" in live_data.columns else "Date"
+
+            fig_live = px.line(
+                live_data,
+                x=time_col,
+                y="Close",
+                title=f"Live {live_crypto} Price",
+                template="plotly_dark"
+            )
+
+            st.plotly_chart(fig_live, use_container_width=True)
+
+    except Exception as e:
+        st.error(f"Live data error: {e}")
+
 
 # ------------------------------------------------------------
 # 2. AI Price Prediction Engine
@@ -363,4 +381,5 @@ download_link = f"""
 st.markdown(download_link, unsafe_allow_html=True)
 
 st.success("✅ Advanced features loaded successfully!")
+
 

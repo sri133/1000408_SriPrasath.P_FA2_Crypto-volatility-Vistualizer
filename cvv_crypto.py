@@ -246,7 +246,7 @@ st.markdown("---")
 st.header("🚀 Advanced Live Trading Features")
 
 # ------------------------------------------------------------
-# 1. Live Crypto Data Dashboard (SAFE VERSION)
+# 1. Live Crypto Data Dashboard (FINAL FIX)
 # ------------------------------------------------------------
 st.subheader("📡 Live Crypto Market Feed")
 
@@ -271,11 +271,15 @@ if st.button("🔄 Fetch Live Data"):
         )
 
         if live_data.empty:
-            st.warning("⚠️ No data returned from Yahoo Finance.")
+            st.warning("⚠️ No data returned.")
         else:
-            live_data.reset_index(inplace=True)
+            # 🔥 Flatten MultiIndex columns
+            if isinstance(live_data.columns, pd.MultiIndex):
+                live_data.columns = live_data.columns.get_level_values(0)
 
-            # Detect correct time column automatically
+            live_data = live_data.reset_index()
+
+            # Detect time column automatically
             time_col = "Datetime" if "Datetime" in live_data.columns else "Date"
 
             fig_live = px.line(
@@ -290,6 +294,7 @@ if st.button("🔄 Fetch Live Data"):
 
     except Exception as e:
         st.error(f"Live data error: {e}")
+
 
 
 # ------------------------------------------------------------
@@ -381,5 +386,6 @@ download_link = f"""
 st.markdown(download_link, unsafe_allow_html=True)
 
 st.success("✅ Advanced features loaded successfully!")
+
 
 

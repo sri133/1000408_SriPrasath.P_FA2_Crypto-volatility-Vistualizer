@@ -7,8 +7,20 @@ import plotly.graph_objects as go
 # -----------------------------
 # Page config
 # -----------------------------
-st.set_page_config(page_title="Crypto Data Preparation", layout="wide")
-st.title("📊 Crypto Volatility Visualizer")
+st.set_page_config(page_title="Crypto Volatility Visualizer", layout="wide", page_icon="🚀")
+
+# CSS for vibrant UI and improved visibility
+st.markdown("""
+    <style>
+    .main { background-color: #0e1117; }
+    .stMetric { background-color: #161b22; border-radius: 10px; padding: 15px; }
+    h1, h2, h3 { color: #00f2ff !important; text-shadow: 2px 2px 4px #000000; }
+    .stNumberInput, .stSelectbox, .stSlider { background-color: #1f2937; border-radius: 5px; }
+    </style>
+    """, unsafe_allow_html=True)
+
+st.title("🚀 Crypto Volatility Visualizer Pro")
+st.markdown("---")
 
 # -----------------------------
 # Cached data loading
@@ -17,298 +29,338 @@ st.title("📊 Crypto Volatility Visualizer")
 def load_data(path):
     return pd.read_csv(path)
 
-file_path = "https://raw.githubusercontent.com/sri133/1000408_SriPrasath.P_FA2_Crypto-volatility-Vistualizer/main/btcusd_1-min_data.csv.crdownload"
+# -----------------------------
+# Multi Crypto Selector
+# -----------------------------
+st.sidebar.subheader("🪙 Select Cryptocurrency")
+
+crypto_files = {
+    "Bitcoin (BTC)": "https://raw.githubusercontent.com/sri133/1000408_SriPrasath.P_FA2_Crypto-volatility-Vistualizer/main/btcusd_1-min_data.csv.crdownload",
+    "Ethereum (ETH)": "https://raw.githubusercontent.com/sri133/1000408_SriPrasath.P_FA2_Crypto-volatility-Vistualizer/main/btcusd_1-min_data.csv.crdownload",
+    "Litecoin (LTC)": "https://raw.githubusercontent.com/sri133/1000408_SriPrasath.P_FA2_Crypto-volatility-Vistualizer/main/btcusd_1-min_data.csv.crdownload"
+}
+
+selected_crypto = st.sidebar.selectbox(
+    "Choose Crypto:",
+    list(crypto_files.keys())
+)
 
 try:
-    df = load_data(file_path)
+    df = load_data(crypto_files[selected_crypto])
+    st.sidebar.success(f"Loaded: {selected_crypto}")
 except Exception as e:
-    st.error(f"❌ Error loading CSV file: {e}")
+    st.error(f"❌ Error loading crypto data: {e}")
     st.stop()
 
-# -----------------------------
-# Raw preview
-# -----------------------------
-st.subheader("🔹 Raw Dataset Preview")
-st.write(df.head(1000))
-st.caption("Showing first 1000 rows for performance")
 
 # -----------------------------
-# Dataset overview
+# Sidebar Enhancements
 # -----------------------------
-st.subheader("🔹 Dataset Overview")
+st.sidebar.header("🛠️ Simulation Dashboard")
 
-col1, col2 = st.columns(2)
+st.sidebar.subheader("💎 Volatility Presets")
+preset = st.sidebar.selectbox(
+    "Select Risk Level:",
+    ["Manual Control", "Stable (Institutional)", "Low Risk (Blue Chip)", "High Risk (Degenerate)"]
+)
 
-with col1:
-    st.write("Dataset Shape:", df.shape)
-    st.write("Columns:", df.columns.tolist())
+if preset == "Stable (Institutional)":
+    amp_val, freq_val, drift_val = 200, 2, 100
+elif preset == "Low Risk (Blue Chip)":
+    amp_val, freq_val, drift_val = 800, 5, 300
+elif preset == "High Risk (Degenerate)":
+    amp_val, freq_val, drift_val = 4000, 15, -500
+else:
+    amp_val, freq_val, drift_val = 1000, 6, 0
 
-with col2:
-    st.write("Missing values:")
-    st.write(df.isnull().sum())
+st.sidebar.subheader("🎨 Customize Pattern")
+amplitude = st.sidebar.slider("📏 Amplitude (Swing)", 100, 5000, amp_val)
+frequency = st.sidebar.slider("🔄 Frequency (Speed)", 1, 20, freq_val)
+drift = st.sidebar.slider("📉 Drift (Trend)", -2000, 2000, drift_val)
+
+st.sidebar.subheader("⚡ Stress Testing")
+add_shock = st.sidebar.toggle("💥 Add Market Shock")
+shock_type = st.sidebar.radio("Shock Type:", ["Flash Crash", "Moon Spike"]) if add_shock else None
+
+comparison_mode = st.sidebar.checkbox("⚖️ Enable Comparison Mode")
 
 # -----------------------------
-# Data cleaning
+# Data Processing
 # -----------------------------
 if "Timestamp" in df.columns:
     df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
     df = df.sort_values("Timestamp")
 
-df.rename(columns={
-    "Open": "Open_Price",
-    "High": "High_Price",
-    "Low": "Low_Price",
-    "Close": "Close_Price"
-}, inplace=True)
+df.rename(columns={"Open": "Open_Price", "High": "High_Price", "Low": "Low_Price", "Close": "Close_Price"}, inplace=True)
+df = df.fillna(df.mean(numeric_only=True)).dropna()
 
-df = df.fillna(df.mean(numeric_only=True))
-df = df.dropna()
-
-# -----------------------------
-# Range selection
-# -----------------------------
-st.subheader("🔹 Select Data Range to Visualize")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    start_row = st.number_input(
-        "Start row:",
-        min_value=0,
-        max_value=len(df) - 1,
-        value=0,
-        step=1
-    )
-
-with col2:
-    end_row = st.number_input(
-        "End row:",
-        min_value=int(start_row) + 1,
-        max_value=len(df),
-        value=min(500, len(df)),
-        step=1
-    )
-
+# Range Selection
+st.subheader("🔍 Select Data Range")
+col_start, col_end = st.columns(2)
+start_row = col_start.number_input("Start row:", 0, len(df)-1, 0)
+end_row = col_end.number_input("End row:", int(start_row)+1, len(df), min(500, len(df)))
 subset_df = df.iloc[int(start_row):int(end_row)]
 
-st.write(f"Showing rows from **{start_row}** to **{end_row}**")
-
 # -----------------------------
-# Cleaned subset preview
-# -----------------------------
-st.subheader("🔹 Cleaned Subset Preview")
-st.write(subset_df.head(1000))
-st.caption("Showing first 1000 rows for performance")
-
-# -----------------------------
-# Statistics
-# -----------------------------
-if "Close_Price" in subset_df.columns:
-    st.subheader("🔹 Close Price Statistics")
-    st.write(subset_df["Close_Price"].describe())
-
-st.success("✅ Complete — Data cleaned and ready!")
-
-# =============================
 # Pattern Simulator Section
-# =============================
-
-st.header("🎛 Crypto Pattern Simulator")
-
 # -----------------------------
-# Pattern Selector
-# -----------------------------
-pattern_type = st.selectbox(
-    "Choose price movement pattern:",
-    ["Real Data", "Sine Wave", "Cosine Wave", "Random Noise"]
-)
+st.header("🎛️ Crypto Pattern Simulator")
+pattern_type = st.selectbox("Choose price movement pattern:", ["Real Data", "Sine Wave", "Cosine Wave", "Random Noise"])
 
-# -----------------------------
-# Controls
-# -----------------------------
-col1, col2 = st.columns(2)
-
-with col1:
-    amplitude = st.slider(
-        "Amplitude (Swing Size)",
-        100, 5000, 1000, step=100
-    )
-
-    frequency = st.slider(
-        "Frequency (Swing Speed)",
-        1, 20, 6
-    )
-
-with col2:
-    drift = st.slider(
-        "Drift (Trend Direction)",
-        -2000, 2000, 0, step=100
-    )
-
-comparison_mode = st.checkbox("Enable Comparison Mode")
-
-# -----------------------------
-# Pattern generation
-# -----------------------------
 pattern_df = subset_df.copy()
+n = len(pattern_df)
+base_price = pattern_df["Close_Price"].mean()
+x = np.linspace(0, frequency * np.pi, n)
+drift_line = np.linspace(0, drift, n)
 
-if "Timestamp" in pattern_df.columns and "Close_Price" in pattern_df.columns:
+if pattern_type == "Sine Wave":
+    wave = amplitude * np.sin(x)
+elif pattern_type == "Cosine Wave":
+    wave = amplitude * np.cos(x)
+elif pattern_type == "Random Noise":
+    wave = np.random.normal(0, amplitude / 2, n)
+else:
+    wave = pattern_df["Close_Price"] - base_price
 
-    n = len(pattern_df)
-    base_price = pattern_df["Close_Price"].mean()
+synthetic_series = base_price + wave + drift_line
+if add_shock:
+    shock_point = n // 2
+    synthetic_series[shock_point:] += (amplitude * 3) if shock_type == "Moon Spike" else -(amplitude * 3)
 
-    x = np.linspace(0, frequency * np.pi, n)
-    drift_line = np.linspace(0, drift, n)
-
-    if pattern_type == "Sine Wave":
-        wave = amplitude * np.sin(x)
-
-    elif pattern_type == "Cosine Wave":
-        wave = amplitude * np.cos(x)
-
-    elif pattern_type == "Random Noise":
-        wave = np.random.normal(0, amplitude / 2, n)
-
-    else:
-        wave = pattern_df["Close_Price"] - base_price
-
-    pattern_df["Synthetic_Price"] = base_price + wave + drift_line
-
-# -----------------------------
-# Visualization
-# -----------------------------
-st.subheader("🔹 Pattern Visualization")
+pattern_df["Synthetic_Price"] = synthetic_series
 
 if comparison_mode:
-
-    col1, col2 = st.columns(2)
-
-    stable_wave = (amplitude / 4) * np.sin(x)
-    volatile_wave = (amplitude * 2) * np.sin(x)
-
-    stable_price = base_price + stable_wave + drift_line
-    volatile_price = base_price + volatile_wave + drift_line
-
-    stable_df = pattern_df.copy()
-    volatile_df = pattern_df.copy()
-
-    stable_df["Price"] = stable_price
-    volatile_df["Price"] = volatile_price
-
-    with col1:
-        st.markdown("### 📉 Stable (Small Swings)")
-        fig_stable = px.line(
-            stable_df,
-            x="Timestamp",
-            y="Price"
-        )
-        st.plotly_chart(fig_stable, use_container_width=True)
-
-    with col2:
-        st.markdown("### 📈 Volatile (Large Swings)")
-        fig_volatile = px.line(
-            volatile_df,
-            x="Timestamp",
-            y="Price"
-        )
-        st.plotly_chart(fig_volatile, use_container_width=True)
-
+    c1, c2 = st.columns(2)
+    stable_price = base_price + (amplitude / 4) * np.sin(x) + drift_line
+    volatile_price = base_price + (amplitude * 2) * np.sin(x) + drift_line
+    with c1:
+        st.markdown("### 🛡️ Stable (Low Risk)")
+        st.plotly_chart(px.line(pattern_df, x="Timestamp", y=stable_price, template="plotly_dark", color_discrete_sequence=['#00ff88']), use_container_width=True)
+    with c2:
+        st.markdown("### 📈 Volatile (High Risk)")
+        st.plotly_chart(px.line(pattern_df, x="Timestamp", y=volatile_price, template="plotly_dark", color_discrete_sequence=['#ff3366']), use_container_width=True)
 else:
+    # Simulator Line with glow effect logic
+    fig_sim = px.line(pattern_df, x="Timestamp", y="Synthetic_Price", title=f"✨ {pattern_type} Simulation", template="plotly_dark", color_discrete_sequence=['#00f2ff'])
+    st.plotly_chart(fig_sim, use_container_width=True)
 
-    fig_pattern = px.line(
-        pattern_df,
-        x="Timestamp",
-        y="Synthetic_Price",
-        title=f"{pattern_type} Pattern Simulation"
+# -----------------------------
+# Enhanced Visualizations
+# -----------------------------
+st.header("📊 Market Insights & Sync'd Analytics")
+
+# 1. Price Trends (Synched with Volume Colors)
+st.subheader("💰 Synced Price & Volume Intensity")
+fig_sync = go.Figure()
+fig_sync.add_trace(go.Scatter(
+    x=subset_df["Timestamp"], 
+    y=subset_df["Close_Price"],
+    mode='lines+markers',
+    marker=dict(
+        size=4,
+        color=subset_df["Volume"], # Color points by volume
+        colorscale='Viridis',
+        showscale=False
+    ),
+    line=dict(color='rgba(255,255,255,0.4)', width=1),
+    name="Price"
+))
+fig_sync.update_layout(template="plotly_dark", xaxis_title="Time", yaxis_title="Price (USD)")
+st.plotly_chart(fig_sync, use_container_width=True)
+
+# 2. High vs Low
+st.subheader("⚖️ High vs Low Price Comparison")
+fig_hl = go.Figure()
+fig_hl.add_trace(go.Scatter(x=subset_df["Timestamp"], y=subset_df["High_Price"], name="High", line=dict(color='#00ff88', width=2)))
+fig_hl.add_trace(go.Scatter(x=subset_df["Timestamp"], y=subset_df["Low_Price"], name="Low", line=dict(color='#ff3366', width=2)))
+fig_hl.update_layout(template="plotly_dark")
+st.plotly_chart(fig_hl, use_container_width=True)
+
+# 3. Trading Volume Analysis (Glow Neon Style)
+st.subheader("🔊 Trading Volume Analysis")
+
+fig_vol_bar = go.Figure()
+
+fig_vol_bar.add_trace(go.Bar(
+    x=subset_df["Timestamp"],
+    y=subset_df["Volume"],
+    marker=dict(
+        color=subset_df["Volume"],
+        colorscale="Viridis",
+        line=dict(width=0),
+        showscale=True,
+        colorbar=dict(title="Volume")
+    ),
+    hovertemplate="Time: %{x}<br>Volume: %{y}<extra></extra>"
+))
+
+fig_vol_bar.update_layout(
+    template="plotly_dark",
+    plot_bgcolor="#05070d",
+    paper_bgcolor="#05070d",
+    xaxis=dict(
+        title="",
+        showgrid=False,
+        zeroline=False,
+        color="#00f2ff"
+    ),
+    yaxis=dict(
+        title="Volume",
+        gridcolor="rgba(255,255,255,0.15)",
+        color="#00f2ff"
+    ),
+    bargap=0.15,
+    showlegend=False
+)
+
+st.plotly_chart(fig_vol_bar, use_container_width=True)
+
+
+# 4. Volatility Scatter
+st.subheader("⚡ Stable vs Volatile Periods")
+vol_df = subset_df.copy()
+vol_df["Price_Change"] = vol_df["Close_Price"].diff().abs()
+threshold = vol_df["Price_Change"].mean()
+vol_df["Status"] = vol_df["Price_Change"].apply(lambda x: "⚡ Volatile" if x > threshold else "🛡️ Stable")
+fig_vol = px.scatter(
+    vol_df, x="Timestamp", y="Close_Price", color="Status",
+    color_discrete_map={"⚡ Volatile": "#ff00ff", "🛡️ Stable": "#00d4ff"}, # Neon Pink and Cyan
+    template="plotly_dark"
+)
+st.plotly_chart(fig_vol, use_container_width=True)
+
+st.success("✅ Volume visibility improved and charts synchronized!")
+
+# ============================================================
+# 🚀 ADVANCED FEATURES MODULE (ADD BELOW EXISTING CODE ONLY)
+# ============================================================
+
+import yfinance as yf
+from datetime import datetime, timedelta
+from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import MinMaxScaler
+import streamlit.components.v1 as components
+import base64
+import time
+
+st.markdown("---")
+st.header("🚀 Advanced Live Trading Features")
+
+# ------------------------------------------------------------
+# 1. Live Crypto Data Dashboard
+# ------------------------------------------------------------
+st.subheader("📡 Live Crypto Market Feed")
+
+live_crypto = st.selectbox(
+    "Choose Live Crypto:",
+    ["BTC-USD", "ETH-USD", "SOL-USD"]
+)
+
+period = st.selectbox(
+    "Time Range:",
+    ["1d", "7d", "1mo"]
+)
+
+if st.button("🔄 Fetch Live Data"):
+    live_data = yf.download(live_crypto, period=period, interval="1m")
+    live_data.reset_index(inplace=True)
+
+    fig_live = px.line(
+        live_data,
+        x="Datetime",
+        y="Close",
+        title=f"Live {live_crypto} Price",
+        template="plotly_dark"
     )
 
-    st.plotly_chart(fig_pattern, use_container_width=True)
+    st.plotly_chart(fig_live, use_container_width=True)
 
-# =============================
-# Original Visualizations
-# =============================
+# ------------------------------------------------------------
+# 2. AI Price Prediction Engine
+# ------------------------------------------------------------
+st.subheader("🤖 AI Price Prediction")
 
-st.header("📈 Bitcoin Visualizations")
+if st.button("Run AI Prediction"):
 
-MAX_POINTS = 5000
+    prices = subset_df["Close_Price"].values.reshape(-1, 1)
 
-if len(subset_df) > MAX_POINTS:
-    step = max(1, len(subset_df) // MAX_POINTS)
-    plot_df = subset_df.iloc[::step]
-else:
-    plot_df = subset_df.copy()
+    scaler = MinMaxScaler()
+    scaled_prices = scaler.fit_transform(prices)
 
-# Price over time
-if "Timestamp" in plot_df.columns and "Close_Price" in plot_df.columns:
+    X, y = [], []
+    window = 20
 
-    st.subheader("🔹 Bitcoin Close Price Over Time")
+    for i in range(window, len(scaled_prices)):
+        X.append(scaled_prices[i-window:i])
+        y.append(scaled_prices[i])
 
-    fig_price = px.line(
-        plot_df,
-        x="Timestamp",
-        y="Close_Price"
-    )
+    X, y = np.array(X), np.array(y)
+    X = X.reshape(X.shape[0], -1)
 
-    st.plotly_chart(fig_price, use_container_width=True)
+    model = MLPRegressor(hidden_layer_sizes=(100, 50), max_iter=500)
+    model.fit(X, y.ravel())
 
-# High vs Low
-if {"Timestamp", "High_Price", "Low_Price"}.issubset(plot_df.columns):
+    future_input = scaled_prices[-window:].reshape(1, -1)
+    prediction = model.predict(future_input)
 
-    st.subheader("🔹 High vs Low Price Comparison")
+    predicted_price = scaler.inverse_transform(
+        prediction.reshape(-1, 1)
+    )[0][0]
 
-    fig_hl = go.Figure()
+    st.metric("🔮 Predicted Next Price", f"${predicted_price:.2f}")
 
-    fig_hl.add_trace(go.Scatter(
-        x=plot_df["Timestamp"],
-        y=plot_df["High_Price"],
-        mode="lines",
-        name="High Price"
-    ))
+# ------------------------------------------------------------
+# 3. TradingView Professional Widget
+# ------------------------------------------------------------
+st.subheader("📊 Professional Trading Chart")
 
-    fig_hl.add_trace(go.Scatter(
-        x=plot_df["Timestamp"],
-        y=plot_df["Low_Price"],
-        mode="lines",
-        name="Low Price"
-    ))
+tradingview_html = f"""
+<div class="tradingview-widget-container">
+  <iframe
+    src="https://s.tradingview.com/widgetembed/?symbol={live_crypto}&interval=1&theme=dark"
+    width="100%"
+    height="500"
+    frameborder="0">
+  </iframe>
+</div>
+"""
 
-    st.plotly_chart(fig_hl, use_container_width=True)
+components.html(tradingview_html, height=520)
 
-# Volume
-if {"Timestamp", "Volume"}.issubset(plot_df.columns):
+# ------------------------------------------------------------
+# 4. Real-Time Simulation Mode
+# ------------------------------------------------------------
+st.subheader("⚡ Live Simulation Mode")
 
-    st.subheader("🔹 Trading Volume Analysis")
+if st.button("▶ Start Simulation"):
 
-    fig_volume = px.bar(
-        plot_df,
-        x="Timestamp",
-        y="Volume"
-    )
+    sim_placeholder = st.empty()
 
-    st.plotly_chart(fig_volume, use_container_width=True)
+    for i in range(50, len(subset_df), 10):
+        sim_fig = px.line(
+            subset_df.iloc[:i],
+            x="Timestamp",
+            y="Close_Price",
+            template="plotly_dark"
+        )
 
-# Volatility
-if {"Timestamp", "Close_Price"}.issubset(plot_df.columns):
+        sim_placeholder.plotly_chart(sim_fig, use_container_width=True)
+        time.sleep(0.2)
 
-    st.subheader("🔹 Stable vs Volatile Periods")
+# ------------------------------------------------------------
+# 5. Export Data Feature
+# ------------------------------------------------------------
+st.subheader("💾 Export Current Dataset")
 
-    vol_df = plot_df.copy()
-    vol_df["Price_Change"] = vol_df["Close_Price"].diff().abs()
+csv = subset_df.to_csv(index=False)
+b64 = base64.b64encode(csv.encode()).decode()
 
-    threshold = vol_df["Price_Change"].mean()
+download_link = f"""
+<a href="data:file/csv;base64,{b64}" download="crypto_data.csv">
+📥 Download CSV File
+</a>
+"""
 
-    vol_df["Volatility_Label"] = vol_df["Price_Change"].apply(
-        lambda x: "Volatile" if x > threshold else "Stable"
-    )
+st.markdown(download_link, unsafe_allow_html=True)
 
-    fig_volatility = px.scatter(
-        vol_df,
-        x="Timestamp",
-        y="Close_Price",
-        color="Volatility_Label"
-    )
-
-    st.plotly_chart(fig_volatility, use_container_width=True)
-
-st.success("✅ Visualizations Generated!")
-
+st.success("✅ Advanced features loaded successfully!")

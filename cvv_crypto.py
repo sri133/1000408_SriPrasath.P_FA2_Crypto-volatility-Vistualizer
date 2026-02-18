@@ -484,47 +484,47 @@ st.markdown("---")
 st.header("📊 Pro Trading Dashboard")
 
 # ------------------------------------------------------------
-# 1. Trade Graph (SAFE VERSION)
+# 1. Trade Graph (Bars + Smooth Lines)
 # ------------------------------------------------------------
 st.subheader("📈 Trade Graph")
 
-# Ensure data exists
-if subset_df.empty or len(subset_df) < 5:
-    st.warning("⚠️ Not enough data to draw trade graph.")
-else:
-    trade_df = subset_df.dropna().tail(100).copy()
+trade_df = subset_df.copy().tail(50)
 
-    # Ensure timestamp exists
-    if "Timestamp" not in trade_df.columns:
-        st.error("❌ Timestamp column missing.")
-    else:
-        fig_trade = go.Figure()
+fig_trade = go.Figure()
 
-        # Volume bars
-        fig_trade.add_trace(go.Bar(
-            x=trade_df["Timestamp"],
-            y=trade_df["Volume"],
-            name="Volume",
-            opacity=0.6
-        ))
+# Volume bars
+fig_trade.add_trace(go.Bar(
+    x=trade_df["Timestamp"],
+    y=trade_df["Volume"],
+    name="Volume",
+    opacity=0.6
+))
 
-        # Smooth close price line
-        fig_trade.add_trace(go.Scatter(
-            x=trade_df["Timestamp"],
-            y=trade_df["Close_Price"],
-            mode="lines",
-            name="Close Price",
-            line=dict(width=3, shape="spline")
-        ))
+# Smooth price lines
+fig_trade.add_trace(go.Scatter(
+    x=trade_df["Timestamp"],
+    y=trade_df["Close_Price"],
+    mode="lines",
+    name="Close Price",
+    line=dict(width=3, shape="spline")
+))
 
-        fig_trade.update_layout(
-            template="plotly_dark",
-            hovermode="x unified",
-            xaxis_title="Time",
-            yaxis_title="Market Activity"
-        )
+fig_trade.add_trace(go.Scatter(
+    x=trade_df["Timestamp"],
+    y=trade_df["High_Price"],
+    mode="lines",
+    name="High",
+    line=dict(width=2, dash="dot", shape="spline")
+))
 
-        st.plotly_chart(fig_trade, use_container_width=True)
+fig_trade.update_layout(
+    template="plotly_dark",
+    hovermode="x unified",
+    xaxis_title="Time",
+    yaxis_title="Market Activity"
+)
+
+st.plotly_chart(fig_trade, use_container_width=True)
 
 # ------------------------------------------------------------
 # 2. Stat Overview KPI Cards
@@ -548,6 +548,7 @@ col5.metric("🔁 Ratio", f"{ratio:.2f}")
 col6.metric("📦 Avg", f"${avg_trade:,.0f}")
 
 st.success("✅ Pro dashboard panels loaded!")
+
 
 
 

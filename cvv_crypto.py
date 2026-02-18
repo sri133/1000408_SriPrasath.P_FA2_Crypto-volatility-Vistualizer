@@ -352,13 +352,14 @@ components.html(tradingview_html, height=520)
 # ------------------------------------------------------------
 # 4. Real-Time Simulation Mode
 # ------------------------------------------------------------
-st.subheader("⚡ Live Simulation Mode")
+sim_speed = st.slider("⚡ Simulation Speed", 0.001, 0.1, 0.02)
 
 if st.button("▶ Start Simulation"):
 
     sim_placeholder = st.empty()
 
-    for i in range(50, len(subset_df), 10):
+    for i in range(50, len(subset_df), 20):  # bigger step = faster jump
+
         sim_fig = px.line(
             subset_df.iloc[:i],
             x="Timestamp",
@@ -367,7 +368,8 @@ if st.button("▶ Start Simulation"):
         )
 
         sim_placeholder.plotly_chart(sim_fig, use_container_width=True)
-        time.sleep(0.2)
+        time.sleep(sim_speed)
+
 
 # ------------------------------------------------------------
 # 5. Export Data Feature
@@ -549,6 +551,7 @@ col5.metric("🔁 Ratio", f"{ratio:.2f}")
 col6.metric("📦 Avg", f"${avg_trade:,.0f}")
 
 st.success("✅ Pro dashboard panels loaded!")
+
 
 
 

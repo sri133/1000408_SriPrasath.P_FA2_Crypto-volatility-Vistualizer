@@ -387,5 +387,167 @@ st.markdown(download_link, unsafe_allow_html=True)
 
 st.success("✅ Advanced features loaded successfully!")
 
+# ============================================================
+# 📊 ADVANCED DASHBOARD ANALYTICS PANEL
+# ============================================================
+
+st.markdown("---")
+st.header("📊 Advanced Dashboard Analytics")
+
+# ------------------------------------------------------------
+# 1. Gains Ratio Donut Chart
+# ------------------------------------------------------------
+st.subheader("💠 Gains Ratio")
+
+# Create synthetic asset groups from existing data
+gains_data = {
+    "BTC Trend": subset_df["Close_Price"].pct_change().abs().mean(),
+    "Volume Strength": subset_df["Volume"].mean(),
+    "High Momentum": subset_df["High_Price"].mean(),
+    "Low Stability": subset_df["Low_Price"].mean()
+}
+
+gains_df = pd.DataFrame({
+    "Category": list(gains_data.keys()),
+    "Value": list(gains_data.values())
+})
+
+fig_donut = px.pie(
+    gains_df,
+    values="Value",
+    names="Category",
+    hole=0.65,
+    template="plotly_dark",
+    color_discrete_sequence=px.colors.sequential.Tealgrn
+)
+
+fig_donut.update_traces(
+    textinfo="percent+label",
+    pull=[0.03]*len(gains_df)
+)
+
+st.plotly_chart(fig_donut, use_container_width=True)
+
+# ------------------------------------------------------------
+# 2. Smooth Multi-Line Analysis Chart
+# ------------------------------------------------------------
+st.subheader("📈 Multi-Metric Analysis")
+
+analysis_df = subset_df.copy()
+
+analysis_df["Trend"] = analysis_df["Close_Price"].rolling(20).mean()
+analysis_df["Momentum"] = analysis_df["Close_Price"].diff()
+analysis_df["Volatility"] = analysis_df["Close_Price"].rolling(20).std()
+
+fig_analysis = go.Figure()
+
+fig_analysis.add_trace(go.Scatter(
+    x=analysis_df["Timestamp"],
+    y=analysis_df["Trend"],
+    mode="lines",
+    name="Trend",
+    line=dict(width=3, shape="spline")
+))
+
+fig_analysis.add_trace(go.Scatter(
+    x=analysis_df["Timestamp"],
+    y=analysis_df["Momentum"],
+    mode="lines",
+    name="Momentum",
+    line=dict(width=3, shape="spline")
+))
+
+fig_analysis.add_trace(go.Scatter(
+    x=analysis_df["Timestamp"],
+    y=analysis_df["Volatility"],
+    mode="lines",
+    name="Volatility",
+    line=dict(width=3, shape="spline")
+))
+
+fig_analysis.update_layout(
+    template="plotly_dark",
+    xaxis_title="Time",
+    yaxis_title="Value",
+    hovermode="x unified"
+)
+
+st.plotly_chart(fig_analysis, use_container_width=True)
+
+st.success("✅ Advanced dashboard analytics loaded!")
+
+# ============================================================
+# 📊 PRO TRADING DASHBOARD PANELS
+# ============================================================
+
+st.markdown("---")
+st.header("📊 Pro Trading Dashboard")
+
+# ------------------------------------------------------------
+# 1. Trade Graph (Bars + Smooth Lines)
+# ------------------------------------------------------------
+st.subheader("📈 Trade Graph")
+
+trade_df = subset_df.copy().tail(50)
+
+fig_trade = go.Figure()
+
+# Volume bars
+fig_trade.add_trace(go.Bar(
+    x=trade_df["Timestamp"],
+    y=trade_df["Volume"],
+    name="Volume",
+    opacity=0.6
+))
+
+# Smooth price lines
+fig_trade.add_trace(go.Scatter(
+    x=trade_df["Timestamp"],
+    y=trade_df["Close_Price"],
+    mode="lines",
+    name="Close Price",
+    line=dict(width=3, shape="spline")
+))
+
+fig_trade.add_trace(go.Scatter(
+    x=trade_df["Timestamp"],
+    y=trade_df["High_Price"],
+    mode="lines",
+    name="High",
+    line=dict(width=2, dash="dot", shape="spline")
+))
+
+fig_trade.update_layout(
+    template="plotly_dark",
+    hovermode="x unified",
+    xaxis_title="Time",
+    yaxis_title="Market Activity"
+)
+
+st.plotly_chart(fig_trade, use_container_width=True)
+
+# ------------------------------------------------------------
+# 2. Stat Overview KPI Cards
+# ------------------------------------------------------------
+st.subheader("📊 Stat Overview")
+
+profit = subset_df["Close_Price"].iloc[-1] - subset_df["Close_Price"].iloc[0]
+equity = subset_df["Close_Price"].mean() * 10
+expectancy = subset_df["High_Price"].mean()
+gain_pct = (profit / subset_df["Close_Price"].iloc[0]) * 100
+ratio = subset_df["High_Price"].mean() / subset_df["Low_Price"].mean()
+avg_trade = subset_df["Volume"].mean()
+
+col1, col2, col3, col4, col5, col6 = st.columns(6)
+
+col1.metric("💰 Profit", f"${profit:,.0f}")
+col2.metric("⚖️ Equality", f"${equity:,.0f}")
+col3.metric("📊 Expectancy", f"${expectancy:,.0f}")
+col4.metric("📈 Gain", f"{gain_pct:.2f}%")
+col5.metric("🔁 Ratio", f"{ratio:.2f}")
+col6.metric("📦 Avg", f"${avg_trade:,.0f}")
+
+st.success("✅ Pro dashboard panels loaded!")
+
 
 

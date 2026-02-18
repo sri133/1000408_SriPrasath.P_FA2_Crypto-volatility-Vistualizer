@@ -531,6 +531,135 @@ col6.metric("📦 Avg", f"${avg_trade:,.0f}")
 
 st.success("✅ Pro dashboard panels loaded!")
 
+# ============================================================
+# 🔥 PRO TRADER ANALYSIS PANEL
+# ============================================================
+
+st.markdown("---")
+st.header("🔥 Pro Trader Candlestick Analysis")
+
+analysis_df = subset_df.copy().dropna()
+
+if len(analysis_df) < 30:
+    st.warning("⚠️ Not enough data for advanced analysis.")
+else:
+
+    # --------------------------------------------------------
+    # 1. Buy / Sell Signal Logic (Moving Average Crossover)
+    # --------------------------------------------------------
+    analysis_df["MA_Short"] = analysis_df["Close_Price"].rolling(10).mean()
+    analysis_df["MA_Long"] = analysis_df["Close_Price"].rolling(25).mean()
+
+    analysis_df["Signal"] = 0
+    analysis_df.loc[
+        analysis_df["MA_Short"] > analysis_df["MA_Long"], "Signal"
+    ] = 1
+
+    analysis_df["Position"] = analysis_df["Signal"].diff()
+
+    buy_signals = analysis_df[analysis_df["Position"] == 1]
+    sell_signals = analysis_df[analysis_df["Position"] == -1]
+
+    # --------------------------------------------------------
+    # 2. AI Prediction Overlay
+    # --------------------------------------------------------
+    prices = analysis_df["Close_Price"].values.reshape(-1, 1)
+
+    scaler = MinMaxScaler()
+    scaled = scaler.fit_transform(prices)
+
+    X, y = [], []
+    window = 15
+
+    for i in range(window, len(scaled)):
+        X.append(scaled[i-window:i])
+        y.append(scaled[i])
+
+    X, y = np.array(X), np.array(y)
+    X = X.reshape(X.shape[0], -1)
+
+    model = MLPRegressor(hidden_layer_sizes=(50, 25), max_iter=300)
+    model.fit(X, y.ravel())
+
+    preds = model.predict(X)
+    preds = scaler.inverse_transform(preds.reshape(-1, 1))
+
+    analysis_df["AI_Prediction"] = np.nan
+    analysis_df.iloc[window:, analysis_df.columns.get_loc("AI_Prediction")] = preds.flatten()
+
+    # --------------------------------------------------------
+    # 3. Candlestick Chart + Overlays
+    # --------------------------------------------------------
+    fig = go.Figure()
+
+    # Candlesticks
+    fig.add_trace(go.Candlestick(
+        x=analysis_df["Timestamp"],
+        open=analysis_df["Open_Price"],
+        high=analysis_df["High_Price"],
+        low=analysis_df["Low_Price"],
+        close=analysis_df["Close_Price"],
+        name="Candles"
+    ))
+
+    # AI prediction line
+    fig.add_trace(go.Scatter(
+        x=analysis_df["Timestamp"],
+        y=analysis_df["AI_Prediction"],
+        mode="lines",
+        name="AI Prediction",
+        line=dict(width=3)
+    ))
+
+    # Buy markers
+    fig.add_trace(go.Scatter(
+        x=buy_signals["Timestamp"],
+        y=buy_signals["Close_Price"],
+        mode="markers",
+        name="Buy",
+        marker=dict(size=10, symbol="triangle-up")
+    ))
+
+    # Sell markers
+    fig.add_trace(go.Scatter(
+        x=sell_signals["Timestamp"],
+        y=sell_signals["Close_Price"],
+        mode="markers",
+        name="Sell",
+        marker=dict(size=10, symbol="triangle-down")
+    ))
+
+    fig.update_layout(
+        template="plotly_dark",
+        title="Candlestick Trading Chart with AI Signals",
+        xaxis_title="Time",
+        yaxis_title="Price"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # --------------------------------------------------------
+    # 4. Volume Heatmap
+    # --------------------------------------------------------
+    st.subheader("🔥 Volume Heatmap")
+
+    heatmap_data = analysis_df.pivot_table(
+        values="Volume",
+        index=analysis_df["Timestamp"].dt.hour,
+        columns=analysis_df["Timestamp"].dt.day,
+        aggfunc="mean"
+    )
+
+    fig_heatmap = px.imshow(
+        heatmap_data,
+        template="plotly_dark",
+        aspect="auto"
+    )
+
+    st.plotly_chart(fig_heatmap, use_container_width=True)
+
+st.success("✅ Pro trader analysis loaded!")
+
 
 
 

@@ -101,11 +101,34 @@ if "Timestamp" in df.columns:
 df.rename(columns={"Open": "Open_Price", "High": "High_Price", "Low": "Low_Price", "Close": "Close_Price"}, inplace=True)
 df = df.fillna(df.mean(numeric_only=True)).dropna()
 
-# Range Selection
+# -----------------------------
+# SAFE Range Selection (FIXED)
+# -----------------------------
 st.subheader("🔍 Select Data Range")
+
 col_start, col_end = st.columns(2)
-start_row = col_start.number_input("Start row:", 0, len(df)-1, 0)
-end_row = col_end.number_input("End row:", int(start_row)+1, len(df), min(500, len(df)))
+
+start_row = col_start.number_input(
+    "Start row:",
+    min_value=0,
+    max_value=len(df) - 2,
+    value=0,
+    step=1
+)
+
+end_row = col_end.number_input(
+    "End row:",
+    min_value=1,
+    max_value=len(df) - 1,
+    value=min(500, len(df) - 1),
+    step=1
+)
+
+# ✅ Safe Validation
+if start_row >= end_row:
+    st.warning("⚠️ Start row must be smaller than End row.")
+    st.stop()
+
 subset_df = df.iloc[int(start_row):int(end_row)]
 
 # -----------------------------
@@ -659,6 +682,7 @@ else:
     st.plotly_chart(fig_heatmap, use_container_width=True)
 
 st.success("✅ Pro trader analysis loaded!")
+
 
 
 
